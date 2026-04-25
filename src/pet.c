@@ -38,7 +38,7 @@ void criarTabelaPets(){
 
 void savePetDB(struct pet p){
 
-    char sql[400];
+    char sql[800];
 
     sprintf(sql,
     "INSERT INTO pets (nome, especie, raca, idade, cliente_id)"
@@ -66,6 +66,12 @@ void savePetDB(struct pet p){
 
 }
 
+static int callbackCount(void *data, int argc, char **argv, char **col){
+    if(argc > 0 && argv[0]){
+        *(int*)data = atoi(argv[0]);
+    }
+    return 0;
+}
 
 //cadastro do pet
 
@@ -86,11 +92,35 @@ void cadastrarPet(){
 
     printf("Idade: ");
     scanf("%d", &novo.idade);
+    while(getchar() != '\n'); // limpa o buffer após ler int
 
 //função para relação do id do cliente para registro do pet
     printf("\nBuscando tutor...\n");
     buscarCliente();   // função do cliente.c
+    while(getchar() != '\n'); // limpa buffer após buscarCliente
 
+    while(1){
+        printf("\nDigite o ID do tutor deste pet (0 para cancelar): ");
+        scanf("%d", &novo.cliente_id);
+
+        if(novo.cliente_id == 0){
+            printf("Operacao cancelada.\n");
+            return;
+        }
+
+        char sql_verifica[200];
+        char *erro_v = 0;
+        int existe = 0;
+        sprintf(sql_verifica, "SELECT COUNT(*) FROM clientes WHERE id=%d;", novo.cliente_id);
+        sqlite3_exec(db, sql_verifica, callbackCount, &existe, &erro_v);
+
+        if(existe){
+            savePetDB(novo);
+            return;
+        } else {
+            printf("Cliente ID %d nao encontrado! Tente outro ID ou 0 para cancelar.\n", novo.cliente_id);
+        }
+    }
     printf("\nDigite o ID do tutor deste pet: ");
     scanf("%d", &novo.cliente_id);
 
@@ -109,6 +139,7 @@ void listarPets(){
 
     char *erro = 0;
 
+    printf("\n========== PETS ==========\n");
     int rc = sqlite3_exec(db, sql, callback, 0, &erro);
 
     if(rc != SQLITE_OK){

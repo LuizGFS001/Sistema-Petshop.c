@@ -1,8 +1,39 @@
-// "cl src\Main.c src\cliente.c src\menu.c src\pet.c src\servico.c src\pedido.c src\itens_pedido.c src\pagamento.c database\database.c sqlite\sqlite3.c /I include /I sqlite /I database /Fe:petshop.exe"
-// CODIGO DE COMPILAÇÃO
+# 🐾 Petshop System
 
+Sistema de gerenciamento de petshop desenvolvido em **linguagem C** com banco de dados **SQLite**, operado via terminal.
 
+## Funcionalidades
 
-// alterações v2, 
-//aperfeiçõamento do sistema de busca de cliente, adicionado busca por id, corrigido falha que o sistema pulava quando o usuario deveria digitar a informações de busca
-// função de cadastro corrigido erro que pulava para o proximo registro quando utilizava espaços separados
+- Gerenciamento de **clientes**, **pets**, **serviços**, **pedidos** e **pagamentos**
+- Banco de dados relacional com integridade referencial (Foreign Keys + CASCADE)
+- Interface de navegação por menus interativos
+
+## Estrutura do Projeto
+
+```
+├── src/          → Arquivos fonte (.c)
+├── include/      → Headers (.h)
+├── database/     → Conexão com o banco
+├── sqlite/       → Biblioteca SQLite (amalgamation)
+└── Petshop.db    → Banco de dados (gerado automaticamente)
+```
+
+## Compilação
+
+### GCC (MinGW)
+```bash
+gcc src/Main.c src/cliente.c src/menu.c src/pet.c src/servico.c src/pedido.c src/itens_pedido.c src/pagamento.c database/database.c sqlite/sqlite3.c -I include -I sqlite -I database -o petshop.exe -D_WIN32_WINNT=0x0600
+```
+
+### MSVC (Visual Studio Build Tools)
+```bash
+cl src\Main.c src\cliente.c src\menu.c src\pet.c src\servico.c src\pedido.c src\itens_pedido.c src\pagamento.c database\database.c sqlite\sqlite3.c /I include /I sqlite /I database /Fe:petshop.exe
+```
+
+## Execução
+
+```bash
+.\petshop.exe
+```
+
+O banco de dados `Petshop.db` é criado automaticamente na primeira execução.

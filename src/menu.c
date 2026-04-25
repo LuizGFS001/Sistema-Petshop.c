@@ -4,7 +4,9 @@
 #include "../include/cliente.h"
 #include "../include/pedido.h"
 #include "../include/pagamento.h"
-
+#include "../include/pet.h"
+#include "../include/servico.h"
+#include "../include/itens_pedido.h"
 
 void menuPrincipal(){
 

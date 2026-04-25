@@ -10,7 +10,6 @@
 #include "../include/itens_pedido.h"
 
 void criarTabelaPedidos(){
-    // Correto
     char *sql =
     "CREATE TABLE IF NOT EXISTS pedidos ("
     "id INTEGER PRIMARY KEY AUTOINCREMENT,"

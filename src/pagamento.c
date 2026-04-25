@@ -5,6 +5,7 @@
 #include "../include/pagamento.h"
 #include "../include/cliente.h"
 #include "../include/pedido.h"
+#include "../include/itens_pedido.h"
 
 void criarTabelaPagamentos(){
     char *sql =
@@ -21,7 +22,7 @@ void criarTabelaPagamentos(){
 }
 
 void savePagamentoDB(struct pagamento p){
-    char sql[400];
+    char sql[800];
     sprintf(sql,
     "INSERT INTO pagamentos (pedido_id, valor, forma, data)"
     " VALUES(%d, %.2f, '%s', '%s');",

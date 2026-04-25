@@ -3,8 +3,8 @@
 
 struct servico{
     int id;
-    char nome[50];
-    char descricao[100];
+    char nome[100];
+    char descricao[150];
     float preco;
 };
 

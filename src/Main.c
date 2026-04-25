@@ -6,6 +6,7 @@
 #include "../include/pedido.h"
 #include "../include/itens_pedido.h"
 #include "../include/pagamento.h"
+#include "../include/pet.h"
 
 int main(){
     if(abrirDB() != 0){

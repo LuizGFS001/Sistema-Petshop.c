@@ -18,7 +18,7 @@ void criarTabelaServicos(){
 }
 
 void saveServicoDB(struct servico s){
-    char sql[400];
+    char sql[800];
     sprintf(sql,
     "INSERT INTO servicos (nome, descricao, preco)"
     " VALUES('%s','%s',%.2f);",

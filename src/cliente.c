@@ -18,7 +18,7 @@ void criartabelaclientes(){
     "email TEXT,"
     "endereco TEXT,"
     "telefone TEXT);";
-    //comando do sql para a criação da tabela com os parâmetros indicados por exemplo id interger armazena apenas valores inteiros, é uma Primary key indicando que é única e autoincrement significa que novos valores irão ser sequencial (ex: 1, 2, 3, 4...)
+    //comando do sql para a criação da tabela com os parâmetros indicados por exemplo, id interger armazena apenas valores inteiros, é uma Primary key indicando que é única e autoincrement significa que novos valores irão ser sequencial (ex: 1, 2, 3, 4...)
 
     char *erro = 0; // variavel de erro caso ocorra algum erro durante a criação da tabela 
     int rc = sqlite3_exec(db, sql, 0, 0, &erro); //a função sqlite3_exec é a função pricipal da biblioteca do sqlite3 onde recebe como parâmetros (db = banco, sql = comando, 0 = callback(sem callback no nosso caso), dados, e o endereço da variavel de erro &erro)
@@ -33,7 +33,7 @@ void criartabelaclientes(){
 
 void saveClientDB(struct cliente c){
 
-    char sql[400];
+    char sql[800]; //definição da quantidade de caracteres para montagem das querys no sql
 
     sprintf(sql, //formatação da string com o comando para inserir na tabela criada acima com os parâmetros indicados abaixo correspondentes aos parâmetros na criação da tabela acima.
     "INSERT INTO clientes (nome, cpf, email, endereco, telefone)"
@@ -127,6 +127,8 @@ void buscarCliente(){
     printf("2 Nome\n");
     printf("3 Telefone\n");
     printf("4 CPF\n");
+
+    printf("Escolha: ");
     scanf("%d",&opcao);
 
     while(getchar() != '\n'); // limpeza de buffer
