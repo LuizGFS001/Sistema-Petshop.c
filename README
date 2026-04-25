@@ -1,0 +1,8 @@
+// "cl src\Main.c src\cliente.c src\menu.c src\pet.c src\servico.c src\pedido.c src\itens_pedido.c src\pagamento.c database\database.c sqlite\sqlite3.c /I include /I sqlite /I database /Fe:petshop.exe"
+// CODIGO DE COMPILAÇÃO
+
+
+
+// alterações v2, 
+//aperfeiçõamento do sistema de busca de cliente, adicionado busca por id, corrigido falha que o sistema pulava quando o usuario deveria digitar a informações de busca
+// função de cadastro corrigido erro que pulava para o proximo registro quando utilizava espaços separados
