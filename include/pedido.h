@@ -16,4 +16,5 @@ void listarPedidos();
 void buscarPedido();
 void alterarPedido();
 void excluirPedido();
+int OrdemServico(int id_cliente, char *data_atual);
 #endif

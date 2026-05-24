@@ -1,0 +1,12 @@
+# Executável compilado
+*.exe
+
+# Banco de dados gerado em runtime
+*.db
+
+# Artefatos de build MSVC
+*.obj
+*.pdb
+
+# Ambiente virtual Python (se houver)
+venv/

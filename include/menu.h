@@ -2,10 +2,9 @@
 #define MENU_H
 
 void menuPrincipal();
-void menuClientes();
-void menuPets();
-void menuServico();
-void menuPedidos();
-void menuPagamentos();
-
+void menuConsultas();
+void menuCadastro();
+void menuProdutos();
+void menuFinanceiro();
+void menuAssinaturas();
 #endif

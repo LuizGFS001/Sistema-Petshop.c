@@ -7,5 +7,10 @@ extern sqlite3 *db;
 
 int abrirDB();
 void fecharDB();
+void criarTabelaServicos();
+void criarTriggerEstoque();
+void popularServicosEProdutos();
+void obterDataAtualBR(char *buffer); 
+void criarTabelaUsoBeneficios();
 
 #endif

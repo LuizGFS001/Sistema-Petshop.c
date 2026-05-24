@@ -1,14 +1,10 @@
 #include <stdio.h>
-#include "../include/cliente.h"
-#include "../database/database.h"
+#include "cliente.h"
+#include "database.h"
 #include "../sqlite/sqlite3.h" //biblioteca do sqlite, de onde vem as funções que usaremos ao decorrer do codigo
 
 
-// criar tabela através do sql
-
-// função
-
-void criartabelaclientes(){
+void criartabelaclientes(){//função para criar a tabela clientes no banco de dados, caso ela ainda não exista. A função utiliza um comando SQL para definir a estrutura da tabela, incluindo os campos id, nome, cpf, email, endereco e telefone. O campo id é definido como chave primária e autoincremento para garantir que cada cliente tenha um identificador único. A função também inclui tratamento de erros para informar caso haja algum problema durante a criação da tabela.
 
     char *sql = 
     "CREATE TABLE IF NOT EXISTS clientes ("
@@ -23,15 +19,13 @@ void criartabelaclientes(){
     char *erro = 0; // variavel de erro caso ocorra algum erro durante a criação da tabela 
     int rc = sqlite3_exec(db, sql, 0, 0, &erro); //a função sqlite3_exec é a função pricipal da biblioteca do sqlite3 onde recebe como parâmetros (db = banco, sql = comando, 0 = callback(sem callback no nosso caso), dados, e o endereço da variavel de erro &erro)
     //A variavel rc significa returncode
-    if(rc != SQLITE_OK){ // a variavel rc que armazena a execução do sqlite, e nessa linha vamos conferir se deu tudo certo onde se rc que recebe a execução der diferente de sqlike_ok ele nos mostrará que não funciou retornando a variavel erro que armazena o erro
+    if(rc != SQLITE_OK){ // a variavel rc que armazena  execução do sqlite, e nessa linha vamos conferir se deu tudo certo onde se rc que recebe a execução der diferente de sqlike_ok ele nos mostrará que não funciou retornando a variavel erro que armazena o erro
         printf("Erro ao criar a tabela: %s\n", erro);
         sqlite3_free(erro);
     }
 }
 
-//salvar clientes
-
-void saveClientDB(struct cliente c){
+void saveClientDB(struct cliente c){//salvar clientes
 
     char sql[800]; //definição da quantidade de caracteres para montagem das querys no sql
 
@@ -58,9 +52,41 @@ void saveClientDB(struct cliente c){
     }
 }
 
-//cadastro do cliente
+int callback(void *data, int argcount, char **argvetor, char **vtColName){ //callback para processar os resultados das consultas SQL, imprimindo as informações de cada cliente no console. A função recebe como parâmetros um ponteiro para dados adicionais (data), o número de colunas retornadas (argcount), um vetor de strings contendo os valores das colunas (argvetor) e um vetor de strings contendo os nomes das colunas (vtColName). A função itera sobre as colunas e imprime o nome e o valor de cada coluna, formatando a saída para facilitar a leitura. A função retorna 0 para indicar que a execução foi bem-sucedida.
+    
+    for(int i = 0; i < argcount; i++){
+        printf("%s: %s\n", //o printf vai imprimir o nome e o valor da coluna
+            vtColName[i],
+            argvetor[i] ? argvetor[i] : "NULL"); // <<<< operação ternaria onde se o valor dentro da tabela for nulo(não tiver nada) vai retornar a str "NULL"
+    }
+    printf("--------------------------\n");
+    return 0;
+}
 
-void cadastrarCliente(){
+int clienteCadastrado() {//função para verificar se o cliente já está cadastrado no banco de dados, utilizando uma consulta SQL para contar o número de registros na tabela de clientes. A função executa a consulta usando sqlite3_exec e um callback para processar o resultado, retornando 1 se houver pelo menos um cliente cadastrado e 0 caso contrário. Caso haja algum erro durante a execução da consulta, a função exibe uma mensagem de erro e retorna 0.
+    int resposta;
+    printf("Cliente cadastrado? (1 = sim, 0 = nao): ");
+    scanf("%d", &resposta);
+    return resposta;
+}
+
+void ClienteGenerico(){//Cria um Cliente genérico para facilitar o processo de atendimento sem a necessidade de cadastrar um cliente real, evitando assim o uso de dados pessoais e respeitando a LGPD. O cliente genérico tem um ID fixo e informações padrão que indicam que é um cliente avulso, sem dados reais associados.
+
+    char *sql =
+    "INSERT OR IGNORE INTO clientes (id, nome, cpf, email, endereco, telefone) "
+    "VALUES (999, 'Cliente Avulso', '000.000.000-00', 'avulso@unipets.com', 'Nao cadastrado', '000000000');";
+
+    char *erro = 0;
+
+    int rc = sqlite3_exec(db, sql, 0, 0, &erro);
+
+    if(rc != SQLITE_OK){
+        printf("Erro ao criar cliente generico: %s\n", erro);
+        sqlite3_free(erro);
+    }
+}
+
+int cadastrarCliente(){//cadastro do cliente
 
     struct cliente novo; 
     
@@ -81,24 +107,36 @@ void cadastrarCliente(){
     scanf(" %[^\n]", novo.telefone);
 
     saveClientDB(novo);
+
+    int id_gerado = (int)sqlite3_last_insert_rowid(db);
+    return id_gerado;
+
 }
 
-//callback para o select
-//a função será chamada automaticamente uma vez para cada linha retornada pela consulta
-int callback(void *data, int argcount, char **argvetor, char **vtColName){ //o argcount conta a quantidade de colunas, argvetor é um vetor contendo os valores das colunas da linha atual do laço e vtColname é o vetor com nome das colunas
+int desejaCadastrar() {//funcão para perguntar ao cliente se deseja se cadastrar, retornando 1 para sim e 0 para não. Essa função é utilizada no processo de atendimento para permitir que o cliente escolha se deseja fornecer seus dados para cadastro ou continuar como cliente avulso, garantindo flexibilidade no atendimento e respeitando a privacidade do cliente.
+    int op;
+    printf("Deseja se cadastrar? (1 = sim, 0 = nao): ");
+    scanf("%d", &op);
+    return op;
+}
+
+void continuarSemCadastro() {
+    char *sql = 
+    "INSERT OR IGNORE INTO clientes (id, nome, cpf, email, endereco, telefone) "
+    "VALUES (999, 'Cliente Avulso', '000.000.000-00', 'avulso@unipets.com', 'Nao cadastrado', '000000000');";
     
-    for(int i = 0; i < argcount; i++){
-        printf("%s: %s\n", //o printf vai imprimir o nome e o valor da coluna
-            vtColName[i],
-            argvetor[i] ? argvetor[i] : "NULL"); // <<<< operação ternaria onde se o valor dentro da tabela for nulo(não tiver nada) vai retornar a str "NULL"
+    char *erro = 0;
+    int rc = sqlite3_exec(db, sql, 0, 0, &erro);
+    
+    if (rc != SQLITE_OK) {
+        printf("Erro ao inicializar cliente avulso: %s\n", erro);
+        sqlite3_free(erro);
+    } else {
+        printf("Continuando atendimento sem cadastro...\n");
     }
-    printf("--------------------------\n");
-    return 0;
 }
 
-//listagem de clientes
-
-void listarClientes(){
+void listarClientes(){//função para listar os clientes cadastrados no banco de dados, utilizando uma consulta SQL para selecionar todos os registros da tabela de clientes. A função utiliza a função sqlite3_exec para executar a consulta e um callback para processar os resultados, imprimindo as informações de cada cliente no console. Caso haja algum erro durante a execução da consulta, a função exibe uma mensagem de erro.
 
     char *sql = "SELECT * FROM clientes"; //Query do sql para puxar toda a tabela clientes 
 
@@ -114,13 +152,13 @@ void listarClientes(){
     }
 }
 
-//função de busca de clientes no bd
-void buscarCliente(){
+int buscarCliente(){//função para buscar clientes no banco de dados, permitindo ao usuário escolher o critério de busca (ID, nome, telefone ou CPF) e inserindo o valor correspondente. A função constrói uma consulta SQL com base na escolha do usuário e executa a consulta usando sqlite3_exec, utilizando um callback para processar os resultados. Caso haja algum erro durante a execução da consulta, a função exibe uma mensagem de erro.
 
     char esco[12];
     int opcao;
     char valor[100];
     char sql[300];
+    int id_selecionado = 0;
 
     printf("\nBuscar cliente por:\n");
     printf("1 ID\n");
@@ -137,7 +175,7 @@ void buscarCliente(){
     else if(opcao == 2)  printf("Digite o Nome: ");
     else if(opcao == 3)  printf("Digite o Telefone: ");
     else if(opcao == 4)  printf("Digite o CPF: ");
-    else{ printf("Opcao invalida!\n"); return; }
+    else { printf("Opcao invalida!\n"); return 999; }
 
     scanf("%[^\n]", valor);
 
@@ -165,14 +203,17 @@ void buscarCliente(){
     }
 
     char *errMsg = 0;
-
     sqlite3_exec(db, sql, callback, 0, &errMsg);
+
+    printf("Confirme o ID do cliente desejado: ");
+    scanf("%d", &id_selecionado);
+    while(getchar() != '\n');
+
+    return id_selecionado;
+
 }
 
-
-//alterar dados do cliente no bd
-
-void alterarCliente(){
+void alterarCliente(){//função para alterar os dados de um cliente existente no banco de dados. A função solicita ao usuário o ID do cliente que deseja alterar e o campo específico que deseja modificar (nome, CPF, email, endereço ou telefone). Em seguida, o usuário insere o novo valor para o campo selecionado. A função constrói uma consulta SQL de atualização com base na escolha do usuário e executa a consulta usando sqlite3_exec. Caso haja algum erro durante a execução da consulta, a função exibe uma mensagem de erro; caso contrário, confirma que a atualização foi bem-sucedida.
     int id;  //declaração de variaveis
     int opcao;
     char valor[100];
@@ -223,8 +264,7 @@ void alterarCliente(){
     }
 }
 
-//função para excluir cliente com cascade para demais relações.
-void excluirCliente(){
+void excluirCliente(){//função para excluir um cliente do banco de dados, solicitando ao usuário o ID do cliente que deseja excluir. A função inclui uma confirmação de exclusão para evitar exclusões acidentais. Se o usuário confirmar a exclusão, a função constrói uma consulta SQL de exclusão e executa a consulta usando sqlite3_exec. Caso haja algum erro durante a execução da consulta, a função exibe uma mensagem de erro; caso contrário, confirma que o cliente foi excluído com sucesso.
 
     int id;
     char confirm;
@@ -258,3 +298,5 @@ void excluirCliente(){
     }
 
 }
+
+

@@ -1,26 +1,29 @@
 #include <stdio.h>
 
-#include "../include/menu.h"
-#include "../include/cliente.h"
-#include "../include/pedido.h"
-#include "../include/pagamento.h"
-#include "../include/pet.h"
-#include "../include/servico.h"
-#include "../include/itens_pedido.h"
+#include "menu.h"
+#include "Atendimento.h"
+#include "cliente.h"
+#include "pedido.h"
+#include "pagamento.h"
+#include "pet.h"
+#include "servico.h"
+#include "itens_pedido.h"
+#include "assinatura.h"
 
-void menuPrincipal(){
+
+void menuPrincipal(){//função para exibir o menu principal do sistema, permitindo ao usuário escolher entre diferentes opções, como iniciar um novo atendimento, acessar consultas, cadastros ou o menu financeiro. A função utiliza um loop para exibir o menu repetidamente até que o usuário escolha a opção de sair. Para cada opção selecionada, a função chama a função correspondente para realizar a ação desejada. Caso haja algum erro durante a execução das consultas SQL, as funções chamadas exibirão mensagens de erro apropriadas.
 
     int opcao;
 
     do{
 
-        printf("\n=== PETSHOP SYSTEM ===\n");
+        printf("\n=== SISTEMA UNIPETS ===\n");
 
-        printf("1 Gerenciar Clientes\n");
-        printf("2 Gerenciar Pets\n");
-        printf("3 Gerenciar Servicos\n");
-        printf("4 Gerenciar Pedidos\n");
-        printf("5 Gerenciar Pagamentos\n");
+        printf("1 Novo Atendimento\n");
+        printf("2 Consultas\n");
+        printf("3 Cadastro\n");
+        printf("4 Financeiro\n");
+        printf("5 Assinaturas\n"); 
         printf("0 Sair\n");
 
         printf("Escolha: ");
@@ -28,11 +31,11 @@ void menuPrincipal(){
 
         switch(opcao){
 
-            case 1: menuClientes(); break;
-            case 2: menuPets(); break;
-            case 3: menuServico(); break;
-            case 4: menuPedidos(); break;
-            case 5: menuPagamentos(); break;
+            case 1: NovoAtendimento(); break;
+            case 2: menuConsultas(); break;
+            case 3: menuCadastro(); break;
+            case 4: menuFinanceiro(); break;
+            case 5: menuAssinaturas(); break;
             case 0: printf("Encerrando sistema...\n"); break;
             default: printf("Opcao invalida!\n");
         }
@@ -40,82 +43,66 @@ void menuPrincipal(){
 
 }
 
-
-void menuClientes(){
+void menuConsultas(){//função para exibir um menu de consultas, permitindo ao usuário escolher entre diferentes tipos de consultas, como buscar clientes, pets, serviços, pedidos ou pagamentos. A função utiliza um loop para exibir o menu repetidamente até que o usuário escolha a opção de voltar. Para cada opção selecionada, a função chama a função correspondente para realizar a consulta e exibir os resultados. Caso haja algum erro durante a execução das consultas SQL, as funções chamadas exibirão mensagens de erro apropriadas.
 
     int opcao;
 
     do{
+        printf("\n=== CONSULTAS ===\n");
 
-        printf("\n=== MENU CLIENTES ===\n");
-
-        printf("1 Cadastrar Cliente\n");
-        printf("2 Listar Clientes\n");
-        printf("3 Alterar Cliente\n");
-        printf("4 Buscar Cliente\n");
-        printf("5 Excluir Cliente\n");
+        printf("1 Buscar Clientes\n");
+        printf("2 Buscar Pets\n");
+        printf("3 Buscar Servicos\n");
+        printf("4 Buscar Pedidos\n");
+        printf("5 Buscar Pagamentos\n");
         printf("0 Voltar\n");
 
-        printf("Escolha: ");
-        scanf("%d",&opcao);
+        scanf("%d", &opcao);
 
         switch(opcao){
+            case 1: buscarCliente(); break;
+            case 2: buscarPet(); break;
+            case 3: buscarServico(); break;
+            case 4: buscarPedido(); break;
+            case 5: buscarPagamento(); break;
+        }
 
+    }while(opcao != 0);
+}
+
+void menuCadastro(){//função para exibir um menu de cadastro, permitindo ao usuário escolher entre diferentes tipos de cadastros, como cadastrar clientes, pets, serviços ou pedidos. A função utiliza um loop para exibir o menu repetidamente até que o usuário escolha a opção de voltar. Para cada opção selecionada, a função chama a função correspondente para realizar o cadastro e salvar os dados no banco de dados. Caso haja algum erro durante a execução das consultas SQL, as funções chamadas exibirão mensagens de erro apropriadas.
+
+    int opcao;
+
+    do{
+        printf("\n=== CADASTRO ===\n");
+
+        printf("1 Clientes\n");
+        printf("2 Pets\n");
+        printf("3 Servicos\n");
+        printf("0 Voltar\n");
+
+        scanf("%d", &opcao);
+
+        switch(opcao){
             case 1: cadastrarCliente(); break;
-            case 2: listarClientes(); break;
-            case 3: alterarCliente(); break;
-            case 4: buscarCliente(); break;
-            case 5: excluirCliente(); break;
-            case 0: printf("Voltando ao menu principal...\n"); break;
-            default: printf("Opcao invalida!\n");
-        }
-    }while(opcao != 0);
-
-}
-
-void menuPets(){
-
-    int opcao;
-
-    do{
-
-        printf("\n=== MENU PETS ===\n");
-
-        printf("1 Cadastrar Pet\n");
-        printf("2 Listar Pets\n");
-        printf("3 Alterar Pet\n");
-        printf("4 Buscar Pet\n");
-        printf("5 Excluir Pet\n");
-        printf("0 Voltar\n");
-
-        printf("Escolha: ");
-        scanf("%d",&opcao);
-
-        switch(opcao){
-
-            case 1: cadastrarPet(); break;
-            case 2: listarPets(); break;
-            case 3: alterarPet(); break;
-            case 4: buscarPet(); break;
-            case 5: excluirPet(); break;
-            case 0: printf("Voltando ao menu principal...\n"); break;
-            default:
-                printf("Opcao invalida!\n");
+            case 2: cadastrarPet(); break;
+            case 3: cadastrarServico(); break;
         }
 
     }while(opcao != 0);
-
 }
 
-void menuServico(){
+
+void menuProdutos(){//função para exibir um menu de produtos, permitindo ao usuário escolher entre diferentes opções relacionadas aos serviços oferecidos, como cadastrar um novo serviço, listar os serviços cadastrados, alterar as informações de um serviço existente, buscar serviços por critérios específicos ou excluir um serviço do banco de dados. A função utiliza um loop para exibir o menu repetidamente até que o usuário escolha a opção de voltar. Para cada opção selecionada, a função chama a função correspondente para realizar a ação desejada. Caso haja algum erro durante a execução das consultas SQL, as funções chamadas exibirão mensagens de erro apropriadas.
     int opcao;
     do{
-        printf("\n=== MENU SERVICOS ===\n");
-        printf("1 Cadastrar Servico\n");
-        printf("2 Listar Servicos\n");
-        printf("3 Alterar Servico\n");
-        printf("4 Buscar Servico\n");
-        printf("5 Excluir Servico\n");
+        printf("\n=== MENU PRODUTOS ===\n");
+        printf("1 Cadastrar Produto\n");
+        printf("2 Listar Produtos\n");
+        printf("3 Alterar Produto\n");
+        printf("4 Buscar Produto\n");
+        printf("5 Excluir Produto\n");
         printf("0 Voltar\n");
         printf("Escolha: ");
         scanf("%d",&opcao);
@@ -133,49 +120,54 @@ void menuServico(){
     }while(opcao != 0);
 }
 
-void menuPedidos(){
+void menuFinanceiro(){//função para exibir um menu financeiro, permitindo ao usuário escolher entre diferentes opções relacionadas aos pagamentos, como listar os pagamentos cadastrados, buscar pagamentos por critérios específicos ou excluir um pagamento do banco de dados. A função utiliza um loop para exibir o menu repetidamente até que the usuário escolha a opção de voltar. Para cada opção selecionada, a função chama a função correspondente para realizar a ação desejada. Caso haja algum erro durante a execução das consultas SQL, as funções chamadas exibirão mensagens de erro apropriadas.
+
     int opcao;
+
     do{
-        printf("\n=== MENU PEDIDOS ===\n");
-        printf("1 Novo Pedido\n");
-        printf("2 Listar Pedidos\n");
-        printf("3 Buscar Pedido\n");
-        printf("4 Alterar Pedido\n");
-        printf("5 Excluir Pedido\n");
+        printf("\n=== FINANCEIRO ===\n");
+
+        printf("1 Listar Pagamentos\n");
+        printf("2 Buscar Pagamento\n");
+        printf("3 Excluir Pagamento\n");
         printf("0 Voltar\n");
         printf("Escolha: ");
-        scanf("%d",&opcao);
+        scanf("%d", &opcao);
 
-        
         switch(opcao){
-            case 1: cadastrarPedido(); break;
-            case 2: listarPedidos(); break;
-            case 3: buscarPedido(); break;
-            case 4: alterarPedido(); break;
-            case 5: excluirPedido(); break;
+            case 1: listarPagamentos(); break;
+            case 2: buscarPagamento(); break;
+            case 3: excluirPagamento(); break;
             case 0: printf("Voltando ao menu principal...\n"); break;
             default: printf("Opcao invalida!\n");
         }
+
     }while(opcao != 0);
 }
 
-void menuPagamentos(){
+void menuAssinaturas(){
     int opcao;
     do{
-        printf("\n=== MENU PAGAMENTOS ===\n");
-        printf("1 Registrar Pagamento\n");
-        printf("2 Listar Pagamentos\n");
-        printf("3 Buscar Pagamento\n");
-        printf("4 Excluir Pagamento\n");
+        printf("\n=== ASSINATURAS ===\n");
+        printf("1 Nova Assinatura\n");
+        printf("2 Listar Assinaturas\n");
+        printf("3 Buscar Assinatura\n");
+        printf("4 Renovar Assinatura\n");
+        printf("5 Cancelar Assinatura\n");
+        printf("6 Verificar Beneficios\n");
+        printf("7 Relatorio\n");
         printf("0 Voltar\n");
         printf("Escolha: ");
-        scanf("%d",&opcao);
+        scanf("%d", &opcao);
         switch(opcao){
-            case 1: cadastrarPagamento(); break;
-            case 2: listarPagamentos(); break;
-            case 3: buscarPagamento(); break;
-            case 4: excluirPagamento(); break;
-            case 0: printf("Voltando ao menu principal...\n"); break;
+            case 1: cadastrarAssinatura(); break;
+            case 2: listarAssinaturas(); break;
+            case 3: buscarAssinatura(); break;
+            case 4: renovarAssinatura(); break;
+            case 5: cancelarAssinatura(); break;
+            case 6: verificarAssinatura(); break;
+            case 7: relatorioAssinaturas(); break;
+            case 0: printf("Voltando...\n"); break;
             default: printf("Opcao invalida!\n");
         }
     }while(opcao != 0);

@@ -11,7 +11,7 @@ struct item_pedido{
 };
 
 void criarTabelaItensPedido();
-void adicionarItemPedido(int pedido_id);
+void adicionarItemPedido(int pedido_id, int id_cliente);
 void listarItensPedido(int pedido_id);
 void excluirItemPedido(int pedido_id);
 

@@ -9,11 +9,15 @@ struct pagamento{
     char data[20];
 };
 
+int callback(void *data, int argc, char **argv, char **col);
+
 void criarTabelaPagamentos();
 void savePagamentoDB(struct pagamento p);
-void cadastrarPagamento();
+void cadastrarPagamento(int pedido_id);
 void listarPagamentos();
 void buscarPagamento();
 void excluirPagamento();
-
+void emitirResumo(int pedido_id);
+int formaPagamento();
+void cadastrarPagamentoAuto();
 #endif

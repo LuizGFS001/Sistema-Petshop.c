@@ -15,11 +15,14 @@ struct cliente{
 int callback(void *data, int argcount, char **argvetor, char **vtColName);
 
 void criartabelaclientes();
-void cadastrarCliente();
+int cadastrarCliente();
 void listarClientes();
-void buscarCliente();
+int buscarCliente();
 void alterarCliente();
 void excluirCliente();
 void saveClientDB(struct cliente c);
+int clienteCadastrado(); 
+int desejaCadastrar();
+void ClienteGenerico();
 
 #endif

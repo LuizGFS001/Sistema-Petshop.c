@@ -16,5 +16,7 @@ void listarPets();
 void buscarPet();
 void alterarPet();
 void excluirPet();
+void PetGenerico(int cliente_id);
+void cadastrarPetAtendimento(int cliente_id);
 
 #endif

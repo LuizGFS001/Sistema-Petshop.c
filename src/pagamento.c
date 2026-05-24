@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "../sqlite/sqlite3.h"
-#include "../database/database.h"
+#include "database.h"
+#include "../include/assinatura.h"
 #include "../include/pagamento.h"
 #include "../include/cliente.h"
 #include "../include/pedido.h"
@@ -33,48 +35,45 @@ void savePagamentoDB(struct pagamento p){
     else{ printf("Pagamento registrado com sucesso!\n"); }
 }
 
-void cadastrarPagamento(){
-    struct pagamento novo;
+static int callbackIDPagamento(void *data, int argc, char **argv, char **col){
+    if(argc > 0 && argv[0]){
+        *(int*)data = atoi(argv[0]);
+    }
+    return 0;
+}
 
-    printf("\n=== REGISTRAR PAGAMENTO ===\n");
+static int callbackTotal(void *data, int argc, char **argv, char **col){
+    if(argc > 0 && argv[0]){
+        *(float*)data = atof(argv[0]);
+    }
+    return 0;
+}
 
-    printf("\nPedidos em aberto:\n");
-    char *sql_abertos = 
-    "SELECT pedidos.id, clientes.nome AS cliente, pedidos.total "
-    "FROM pedidos "
-    "JOIN clientes ON pedidos.cliente_id = clientes.id "
-    "WHERE pedidos.status = 'aberto';";
-    sqlite3_exec(db, sql_abertos, callback, 0, 0);
+static int cbPlano(void *data, int argc, char **argv, char **col){
+    if(argc > 0 && argv[0]) strcpy((char*)data, argv[0]);
+    return 0;
+}
 
-    printf("\nDigite o ID do pedido: ");
-    scanf("%d", &novo.pedido_id);
+static int callbackClienteId(void *data, int argc, char **argv, char **col){
+    if(argc > 0 && argv[0]){
+        *(int*)data = atoi(argv[0]);
+    }
+    return 0;
+}
 
-    // exibe os itens do pedido selecionado
-    printf("\n=== ITENS DO PEDIDO ===\n");
-    listarItensPedido(novo.pedido_id);
+void emitirResumo(int pedido_id){
+    printf("\n=========== RESUMO DO PEDIDO ===========\n");
+    printf("Pedido #%d\n", pedido_id);
 
-    // busca o total do pedido automaticamente
+    listarItensPedido(pedido_id);
+
     char sql_total[200];
-    sprintf(sql_total, "SELECT total FROM pedidos WHERE id=%d;", novo.pedido_id);
-    printf("Total do pedido: ");
+    sprintf(sql_total, "SELECT total FROM pedidos WHERE id=%d;", pedido_id);
+
+    printf("\nTotal do pedido:\n");
     sqlite3_exec(db, sql_total, callback, 0, 0);
 
-    printf("\nValor do pagamento: ");
-    scanf("%f", &novo.valor);
-
-    printf("Forma de pagamento (dinheiro/cartao/pix): ");
-    scanf(" %[^\n]", novo.forma);
-
-    printf("Data (YYYY-MM-DD): ");
-    scanf(" %[^\n]", novo.data);
-
-    savePagamentoDB(novo);
-
-    // atualiza status do pedido para fechado
-    char sql_status[200];
-    sprintf(sql_status, "UPDATE pedidos SET status='fechado' WHERE id=%d;", novo.pedido_id);
-    sqlite3_exec(db, sql_status, 0, 0, 0);
-    printf("Pedido #%d fechado!\n", novo.pedido_id);
+    printf("========================================\n");
 }
 
 void listarPagamentos(){
@@ -142,6 +141,24 @@ void buscarPagamento(){
     if(errMsg){ printf("Erro na busca: %s\n", errMsg); sqlite3_free(errMsg); }
 }
 
+int formaPagamento(){
+    int opcao;
+
+    printf("\n=== FORMA DE PAGAMENTO ===\n");
+    printf("1 - Dinheiro\n");
+    printf("2 - Cartao\n");
+    printf("3 - Pix\n");
+    printf("Escolha: ");
+    scanf("%d", &opcao);
+
+    while(opcao < 1 || opcao > 3){
+        printf("Opcao invalida. Tente novamente: ");
+        scanf("%d", &opcao);
+    }
+
+    return opcao;
+}
+
 void excluirPagamento(){
     int id;
     char confirm;
@@ -156,7 +173,6 @@ void excluirPagamento(){
     scanf(" %c", &confirm);
     if(confirm != 's' && confirm != 'S'){ printf("Operacao cancelada.\n"); return; }
 
-    // reabre o pedido ao excluir o pagamento
     char sql_pedido[200];
     sprintf(sql_pedido,
     "UPDATE pedidos SET status='aberto' WHERE id=("
@@ -168,4 +184,75 @@ void excluirPagamento(){
     int rc = sqlite3_exec(db, sql, 0, 0, &erro);
     if(rc != SQLITE_OK){ printf("Erro ao excluir pagamento: %s\n", erro); sqlite3_free(erro); }
     else{ printf("Pagamento excluido e pedido reaberto!\n"); }
+}
+
+void cadastrarPagamento(int pedido_id){
+    struct pagamento novo;
+
+    printf("\n=== PROCESSANDO PAGAMENTO ===\n");
+
+    novo.pedido_id = pedido_id;
+    printf("Pedido atual: #%d\n", pedido_id);
+
+    float total = 0;
+    char sql_total[200];
+    sprintf(sql_total, "SELECT total FROM pedidos WHERE id=%d;", pedido_id);
+    sqlite3_exec(db, sql_total, callbackTotal, &total, 0);
+
+    printf("Total calculado automaticamente: R$ %.2f\n", total);
+
+    // busca cliente do pedido
+    int cli_id = 0;
+    char sql_cli[200];
+    sprintf(sql_cli, "SELECT cliente_id FROM pedidos WHERE id=%d;", pedido_id);
+    sqlite3_exec(db, sql_cli, callbackIDPagamento, &cli_id, 0);
+
+    // aplica desconto do plano se cliente tiver assinatura ativa
+    if(cli_id > 0 && cli_id != 999){
+        char plano[50] = "";
+        char sql_plano[300];
+        sprintf(sql_plano,
+            "SELECT plano FROM assinatura "
+            "WHERE cliente_id=%d AND status='ATIVA';",
+            cli_id);
+        sqlite3_exec(db, sql_plano, cbPlano, plano, 0);
+
+        float desconto = 0.0;
+        if(strcmp(plano, "PATINHAS") == 0)        desconto = 0.05;
+        else if(strcmp(plano, "AMIGO PET") == 0)  desconto = 0.10;
+        else if(strcmp(plano, "VIDA ANIMAL") == 0) desconto = 0.15;
+
+        if(desconto > 0){
+            float valor_desc = total * desconto;
+            printf("Plano %s: %.0f%% de desconto!\n", plano, desconto * 100);
+            printf("Desconto: R$ %.2f\n", valor_desc);
+            total = total - valor_desc;
+            printf("Total com desconto: R$ %.2f\n", total);
+        }
+    }
+
+    novo.valor = total;
+
+    int op = formaPagamento();
+    if(op == 1) strcpy(novo.forma, "dinheiro");
+    else if(op == 2) strcpy(novo.forma, "cartao");
+    else strcpy(novo.forma, "pix");
+
+    obterDataAtualBR(novo.data);
+    printf("Data do sistema aplicada: %s\n", novo.data);
+
+    savePagamentoDB(novo);
+
+    // acumula pontos na assinatura do cliente
+    if(cli_id > 0 && cli_id != 999){
+        int pontos = (int)novo.valor;
+        adicionarPontos(cli_id, pontos);
+        printf("+ %d pontos adicionados a assinatura do cliente!\n", pontos);
+    }
+
+    char sql_status[200];
+    sprintf(sql_status, "UPDATE pedidos SET status='fechado' WHERE id=%d;", pedido_id);
+    sqlite3_exec(db, sql_status, 0, 0, 0);
+
+    printf("Pedido #%d finalizado com sucesso!\n", pedido_id);
 }
