@@ -40,12 +40,6 @@ void saveServicoDB(struct servico s){//função para salvar um serviço no banco
     else{ printf("Servico cadastrado com sucesso!\n"); }
 }
 
-static int callbackID(void *data, int argc, char **argv, char **col){//callback para obter o ID do último pedido cadastrado, armazenando o valor em uma variável passada por referência. A função verifica se há resultados e, se houver, converte o valor do ID para um inteiro e armazena na variável. A função retorna 0 para indicar que a execução foi bem-sucedida.
-    if(argc > 0 && argv[0]){
-        *(int*)data = atoi(argv[0]);
-    }
-    return 0;
-}
 
 void cadastrarServico(){//função para cadastrar um novo serviço, solicitando ao usuário as informações do serviço (nome, descrição e preço) e salvando os dados no banco de dados. A função inclui um loop para permitir o cadastro de múltiplos serviços, perguntando ao usuário se deseja cadastrar outro serviço após cada cadastro.
     char continuar='s';
@@ -66,7 +60,7 @@ int op;
 scanf("%d",&op);
 if(op==1){
 strcpy(novo.tipo,"SERVICO");
-novo.estoque=0;
+novo.estoque=-1;
 novo.estoqueMinimo=0;
 }else{
 

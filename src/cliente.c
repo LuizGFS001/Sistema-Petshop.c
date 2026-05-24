@@ -154,7 +154,6 @@ void listarClientes(){//função para listar os clientes cadastrados no banco de
 
 int buscarCliente(){//função para buscar clientes no banco de dados, permitindo ao usuário escolher o critério de busca (ID, nome, telefone ou CPF) e inserindo o valor correspondente. A função constrói uma consulta SQL com base na escolha do usuário e executa a consulta usando sqlite3_exec, utilizando um callback para processar os resultados. Caso haja algum erro durante a execução da consulta, a função exibe uma mensagem de erro.
 
-    char esco[12];
     int opcao;
     char valor[100];
     char sql[300];

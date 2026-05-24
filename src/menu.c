@@ -97,31 +97,6 @@ void menuCadastro(){//função para exibir um menu de cadastro, permitindo ao us
 }
 
 
-void menuProdutos(){//função para exibir um menu de produtos, permitindo ao usuário escolher entre diferentes opções relacionadas aos serviços oferecidos, como cadastrar um novo serviço, listar os serviços cadastrados, alterar as informações de um serviço existente, buscar serviços por critérios específicos ou excluir um serviço do banco de dados. A função utiliza um loop para exibir o menu repetidamente até que o usuário escolha a opção de voltar. Para cada opção selecionada, a função chama a função correspondente para realizar a ação desejada. Caso haja algum erro durante a execução das consultas SQL, as funções chamadas exibirão mensagens de erro apropriadas.
-    int opcao;
-    do{
-        printf("\n=== MENU PRODUTOS ===\n");
-        printf("1 Cadastrar Produto\n");
-        printf("2 Listar Produtos\n");
-        printf("3 Alterar Produto\n");
-        printf("4 Buscar Produto\n");
-        printf("5 Excluir Produto\n");
-        printf("0 Voltar\n");
-        printf("Escolha: ");
-        scanf("%d",&opcao);
-
-
-        switch(opcao){
-            case 1: cadastrarServico(); break;
-            case 2: listarServicos(); break;
-            case 3: alterarServico(); break;
-            case 4: buscarServico(); break;
-            case 5: excluirServico(); break;
-            case 0: printf("Voltando ao menu principal...\n"); break;
-            default: printf("Opcao invalida!\n");
-        }
-    }while(opcao != 0);
-}
 
 void menuFinanceiro(){//função para exibir um menu financeiro, permitindo ao usuário escolher entre diferentes opções relacionadas aos pagamentos, como listar os pagamentos cadastrados, buscar pagamentos por critérios específicos ou excluir um pagamento do banco de dados. A função utiliza um loop para exibir o menu repetidamente até que the usuário escolha a opção de voltar. Para cada opção selecionada, a função chama a função correspondente para realizar a ação desejada. Caso haja algum erro durante a execução das consultas SQL, as funções chamadas exibirão mensagens de erro apropriadas.
 

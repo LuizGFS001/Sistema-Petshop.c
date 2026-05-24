@@ -7,17 +7,6 @@
 #include "../database/database.h"
 #include "../sqlite/sqlite3.h"
 
-typedef struct {
-    int cliente_id;
-    int pet_id;
-    char plano[50];
-    float valor;
-    char data_inicio[50];
-    char data_renovacao[50];
-    char status[20];
-    int pontos;
-} assinatura;
-
 
 
 void criarTabelaAssinatura() {//função para criar a tabela de assinaturas no banco de dados, caso ela ainda não exista. A função utiliza um comando SQL para definir a estrutura da tabela, incluindo os campos id, cliente_id, pet_id, plano, valor, data_inicio, data_renovacao, status e pontos. Os campos cliente_id e pet_id são definidos como chaves estrangeiras que referenciam as tabelas de clientes e pets, respectivamente. A função também inclui tratamento de erros para informar caso haja algum problema durante a criação da tabela.
@@ -282,16 +271,13 @@ void adicionarPontos(//função para adicionar pontos a uma assinatura, recebend
     );
 }
 
-void verificarAssinatura() {//função para verificar o status de uma assinatura, solicitando ao usuário o ID do cliente. A função constrói uma consulta SQL para selecionar a assinatura correspondente ao ID do cliente fornecido e executa a consulta usando sqlite3_exec, utilizando o callback callbackAssinatura para processar os resultados. Caso haja algum erro durante a execução da consulta, a função exibe uma mensagem de erro; caso contrário, exibe os detalhes da assinatura do cliente.
-    int cliente_id;
+void verificarAssinatura() {
     char sql[300];
     char *erro = 0;
 
     printf("\n=== VERIFICAR BENEFÍCIOS DO CLIENTE ===\n");
-    buscarCliente();
-
-    printf("\nDigite o ID do cliente para ver a Assinatura: ");
-    scanf("%d", &cliente_id);
+    int cliente_id = buscarCliente();
+    if(cliente_id <= 0){ printf("Cliente nao encontrado.\n"); return; }
 
     sprintf(
         sql,

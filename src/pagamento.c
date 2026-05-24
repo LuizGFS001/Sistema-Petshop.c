@@ -54,12 +54,6 @@ static int cbPlano(void *data, int argc, char **argv, char **col){
     return 0;
 }
 
-static int callbackClienteId(void *data, int argc, char **argv, char **col){
-    if(argc > 0 && argv[0]){
-        *(int*)data = atoi(argv[0]);
-    }
-    return 0;
-}
 
 void emitirResumo(int pedido_id){
     printf("\n=========== RESUMO DO PEDIDO ===========\n");
