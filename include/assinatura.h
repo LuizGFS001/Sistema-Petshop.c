@@ -15,7 +15,7 @@ struct assinatura {
 };
 
 void criarTabelaAssinatura();
-void cadastrarAssinatura();
+float cadastrarAssinatura(int *out_cliente_id);
 void listarAssinaturas();
 void buscarAssinatura();
 void renovarAssinatura();

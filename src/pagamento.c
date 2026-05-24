@@ -203,27 +203,51 @@ void cadastrarPagamento(int pedido_id){
     sprintf(sql_cli, "SELECT cliente_id FROM pedidos WHERE id=%d;", pedido_id);
     sqlite3_exec(db, sql_cli, callbackIDPagamento, &cli_id, 0);
 
-    // aplica desconto do plano se cliente tiver assinatura ativa
+    char plano[50] = "";
+    char sql_plano[300];
+
     if(cli_id > 0 && cli_id != 999){
-        char plano[50] = "";
-        char sql_plano[300];
         sprintf(sql_plano,
             "SELECT plano FROM assinatura "
             "WHERE cliente_id=%d AND status='ATIVA';",
             cli_id);
         sqlite3_exec(db, sql_plano, cbPlano, plano, 0);
 
-        float desconto = 0.0;
-        if(strcmp(plano, "PATINHAS") == 0)        desconto = 0.05;
-        else if(strcmp(plano, "AMIGO PET") == 0)  desconto = 0.10;
-        else if(strcmp(plano, "VIDA ANIMAL") == 0) desconto = 0.15;
+        if(strlen(plano) == 0){
+            printf("\nCliente sem assinatura ativa.\n");
+            printf("Deseja iniciar uma agora? (1 = sim / 0 = nao): ");
+            int resp = 0;
+            scanf("%d", &resp);
+            if(resp == 1){
+                int dummy = 0;
+                float sub_val = cadastrarAssinatura(&dummy);
+                if(sub_val > 0){
+                    total += sub_val;
+                    char sql_upd[200];
+                    sprintf(sql_upd,
+                        "UPDATE pedidos SET total = total + %.2f WHERE id=%d;",
+                        sub_val, pedido_id);
+                    sqlite3_exec(db, sql_upd, 0, 0, 0);
+                    printf("Assinatura (R$ %.2f) adicionada ao total do pedido.\n", sub_val);
+                }
+                memset(plano, 0, sizeof(plano));
+                sqlite3_exec(db, sql_plano, cbPlano, plano, 0);
+            }
+        }
 
-        if(desconto > 0){
-            float valor_desc = total * desconto;
-            printf("Plano %s: %.0f%% de desconto!\n", plano, desconto * 100);
-            printf("Desconto: R$ %.2f\n", valor_desc);
-            total = total - valor_desc;
-            printf("Total com desconto: R$ %.2f\n", total);
+        if(strlen(plano) > 0){
+            float desconto = 0.0;
+            if(strcmp(plano, "PATINHAS") == 0)         desconto = 0.05;
+            else if(strcmp(plano, "AMIGO PET") == 0)   desconto = 0.10;
+            else if(strcmp(plano, "VIDA ANIMAL") == 0) desconto = 0.15;
+
+            if(desconto > 0){
+                float valor_desc = total * desconto;
+                printf("Plano %s: %.0f%% de desconto!\n", plano, desconto * 100);
+                printf("Desconto: R$ %.2f\n", valor_desc);
+                total = total - valor_desc;
+                printf("Total com desconto: R$ %.2f\n", total);
+            }
         }
     }
 
@@ -239,8 +263,8 @@ void cadastrarPagamento(int pedido_id){
 
     savePagamentoDB(novo);
 
-    // acumula pontos na assinatura do cliente
-    if(cli_id > 0 && cli_id != 999){
+    // acumula pontos apenas se tiver assinatura ativa
+    if(cli_id > 0 && cli_id != 999 && strlen(plano) > 0){
         int pontos = (int)novo.valor;
         adicionarPontos(cli_id, pontos);
         printf("+ %d pontos adicionados a assinatura do cliente!\n", pontos);
@@ -251,4 +275,25 @@ void cadastrarPagamento(int pedido_id){
     sqlite3_exec(db, sql_status, 0, 0, 0);
 
     printf("Pedido #%d finalizado com sucesso!\n", pedido_id);
+}
+
+void cobrarAssinaturaStandalone(int cliente_id, float valor){
+    char data_atual[11];
+    obterDataAtualBR(data_atual);
+
+    char sql_pedido[300];
+    sprintf(sql_pedido,
+        "INSERT INTO pedidos (cliente_id, data, total, status) "
+        "VALUES (%d, '%s', %.2f, 'aberto');",
+        cliente_id, data_atual, valor);
+    char *erro = 0;
+    int rc = sqlite3_exec(db, sql_pedido, 0, 0, &erro);
+    if(rc != SQLITE_OK){
+        printf("Erro ao criar pedido para assinatura: %s\n", erro);
+        sqlite3_free(erro);
+        return;
+    }
+    int pedido_id = (int)sqlite3_last_insert_rowid(db);
+    printf("\nPedido #%d criado para cobrar assinatura (R$ %.2f).\n", pedido_id, valor);
+    cadastrarPagamento(pedido_id);
 }

@@ -138,7 +138,12 @@ void menuAssinaturas(){
         printf("Escolha: ");
         scanf("%d", &opcao);
         switch(opcao){
-            case 1: cadastrarAssinatura(); break;
+            case 1: {
+                int cli_id = 0;
+                float val = cadastrarAssinatura(&cli_id);
+                if(val > 0 && cli_id > 0) cobrarAssinaturaStandalone(cli_id, val);
+                break;
+            }
             case 2: listarAssinaturas(); break;
             case 3: buscarAssinatura(); break;
             case 4: renovarAssinatura(); break;

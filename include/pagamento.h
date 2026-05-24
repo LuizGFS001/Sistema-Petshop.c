@@ -20,4 +20,5 @@ void excluirPagamento();
 void emitirResumo(int pedido_id);
 int formaPagamento();
 void cadastrarPagamentoAuto();
+void cobrarAssinaturaStandalone(int cliente_id, float valor);
 #endif

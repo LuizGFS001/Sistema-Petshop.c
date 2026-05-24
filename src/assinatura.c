@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "../include/cliente.h"
+#include "../include/pet.h"
 #include "../include/assinatura.h"
 #include "../database/database.h"
 #include "../sqlite/sqlite3.h"
@@ -57,27 +58,71 @@ static int callbackAssinatura(
     return 0;
 }
 
-void cadastrarAssinatura() {//função para cadastrar uma nova assinatura, solicitando ao usuário as informações necessárias e salvando os dados no banco de dados. A função coleta o ID do cliente, o ID do pet, o plano escolhido, o valor da assinatura, as datas de início e renovação, e o status da assinatura. Em seguida, a função constrói uma consulta SQL de inserção com os dados da assinatura e executa a consulta usando sqlite3_exec. Caso haja algum erro durante a execução da consulta, a função exibe uma mensagem de erro; caso contrário, confirma que a assinatura foi criada com sucesso.
+float cadastrarAssinatura(int *out_cliente_id) {//função para cadastrar uma nova assinatura, solicitando ao usuário as informações necessárias e salvando os dados no banco de dados. A função coleta o ID do cliente, o ID do pet, o plano escolhido, o valor da assinatura, as datas de início e renovação, e o status da assinatura. Em seguida, a função constrói uma consulta SQL de inserção com os dados da assinatura e executa a consulta usando sqlite3_exec. Caso haja algum erro durante a execução da consulta, a função exibe uma mensagem de erro; caso contrário, confirma que a assinatura foi criada com sucesso.
 
     struct assinatura a;
     int op;
 
     printf("\n=== NOVA ASSINATURA ===\n");
 
-    listarClientes();
+    printf("\n--- Clientes ---\n");
+    char *sql_cli_lista =
+        "SELECT id || ' - ' || nome AS cliente FROM clientes WHERE id != 999 ORDER BY id;";
+    sqlite3_exec(db, sql_cli_lista, callbackAssinatura, 0, 0);
 
     printf("ID cliente (0 = cancelar): ");
     scanf("%d", &a.cliente_id);
-    if(a.cliente_id == 0){ printf("Operacao cancelada.\n"); return; }
+    if(a.cliente_id == 0){ printf("Operacao cancelada.\n"); return 0.0f; }
 
     char sql_val[200];
     int existe = 0;
     sprintf(sql_val, "SELECT COUNT(*) FROM clientes WHERE id=%d;", a.cliente_id);
     sqlite3_exec(db, sql_val, callbackContador, &existe, 0);
-    if(!existe){ printf("Cliente ID %d nao encontrado.\n", a.cliente_id); return; }
+    if(!existe){ printf("Cliente ID %d nao encontrado.\n", a.cliente_id); return 0.0f; }
 
-    printf("ID pet (0 = sem pet vinculado): ");
-    scanf("%d", &a.pet_id);
+    char sql_pets[200];
+    sprintf(sql_pets,
+        "SELECT id, nome, especie FROM pets WHERE cliente_id=%d;",
+        a.cliente_id);
+
+    int total_pets = 0;
+    printf("\nPets do cliente:\n");
+    sqlite3_exec(db, sql_pets, callbackAssinatura, &total_pets, 0);
+
+    if(total_pets == 0){
+        printf("Nenhum pet cadastrado para este cliente.\n");
+        printf("1 Cadastrar pet agora\n");
+        printf("0 Continuar sem pet especifico\n");
+        printf("Escolha: ");
+        int resp_pet = 0;
+        scanf("%d", &resp_pet);
+        if(resp_pet == 1){
+            cadastrarPetAtendimento(a.cliente_id);
+            total_pets = 0;
+            printf("\nPets do cliente:\n");
+            sqlite3_exec(db, sql_pets, callbackAssinatura, &total_pets, 0);
+        }
+    }
+
+    if(total_pets == 0){
+        a.pet_id = 0;
+        printf("Prosseguindo sem pet especifico.\n");
+    } else {
+        printf("ID pet (0 = sem pet especifico): ");
+        scanf("%d", &a.pet_id);
+        if(a.pet_id != 0){
+            int pet_existe = 0;
+            char sql_pet_val[200];
+            sprintf(sql_pet_val,
+                "SELECT COUNT(*) FROM pets WHERE id=%d AND cliente_id=%d;",
+                a.pet_id, a.cliente_id);
+            sqlite3_exec(db, sql_pet_val, callbackContador, &pet_existe, 0);
+            if(!pet_existe){
+                printf("Pet ID %d nao encontrado para este cliente.\n", a.pet_id);
+                return 0.0f;
+            }
+        }
+    }
 
     printf("\nPLANOS\n");
     printf("1 - PATINHAS\n");
@@ -91,7 +136,7 @@ void cadastrarAssinatura() {//função para cadastrar uma nova assinatura, solic
 
         case 0:
             printf("Operacao cancelada.\n");
-            return;
+            return 0.0f;
 
         case 1:
             strcpy(a.plano, "PATINHAS");
@@ -110,7 +155,7 @@ void cadastrarAssinatura() {//função para cadastrar uma nova assinatura, solic
 
         default:
             printf("Plano invalido\n");
-            return;
+            return 0.0f;
     }
 
     printf("Data inicio: ");
@@ -165,14 +210,13 @@ void cadastrarAssinatura() {//função para cadastrar uma nova assinatura, solic
     );
 
     if (erro) {
-
         printf("Erro: %s\n", erro);
-
         sqlite3_free(erro);
-
+        return 0.0f;
     } else {
-
         printf("Assinatura criada com sucesso\n");
+        if(out_cliente_id) *out_cliente_id = a.cliente_id;
+        return a.valor;
     }
 }
 
