@@ -9,6 +9,7 @@
 #include "pagamento.h"
 #include "pet.h"
 #include "assinatura.h"
+#include "agendamento.h"
 
 int main(){// Inicia o programa
 
@@ -30,6 +31,7 @@ int main(){// Inicia o programa
     criarTabelaItensPedido();
     criarTabelaPagamentos();
     criarTabelaAssinatura();
+    criarTabelaAgendamentos();
     menuPrincipal();
     fecharDB();
     return 0;

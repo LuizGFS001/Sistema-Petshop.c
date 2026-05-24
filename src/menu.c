@@ -9,6 +9,7 @@
 #include "servico.h"
 #include "itens_pedido.h"
 #include "assinatura.h"
+#include "agendamento.h"
 
 
 void menuPrincipal(){//função para exibir o menu principal do sistema, permitindo ao usuário escolher entre diferentes opções, como iniciar um novo atendimento, acessar consultas, cadastros ou o menu financeiro. A função utiliza um loop para exibir o menu repetidamente até que o usuário escolha a opção de sair. Para cada opção selecionada, a função chama a função correspondente para realizar a ação desejada. Caso haja algum erro durante a execução das consultas SQL, as funções chamadas exibirão mensagens de erro apropriadas.
@@ -23,7 +24,8 @@ void menuPrincipal(){//função para exibir o menu principal do sistema, permiti
         printf("2 Consultas\n");
         printf("3 Cadastro\n");
         printf("4 Financeiro\n");
-        printf("5 Assinaturas\n"); 
+        printf("5 Assinaturas\n");
+        printf("6 Agendamentos\n");
         printf("0 Sair\n");
 
         printf("Escolha: ");
@@ -36,6 +38,7 @@ void menuPrincipal(){//função para exibir o menu principal do sistema, permiti
             case 3: menuCadastro(); break;
             case 4: menuFinanceiro(); break;
             case 5: menuAssinaturas(); break;
+            case 6: menuAgendamentos(); break;
             case 0: printf("Encerrando sistema...\n"); break;
             default: printf("Opcao invalida!\n");
         }
@@ -167,6 +170,34 @@ void menuAssinaturas(){
             case 5: cancelarAssinatura(); break;
             case 6: verificarAssinatura(); break;
             case 7: relatorioAssinaturas(); break;
+            case 0: printf("Voltando...\n"); break;
+            default: printf("Opcao invalida!\n");
+        }
+    }while(opcao != 0);
+}
+
+void menuAgendamentos(){
+    int opcao;
+    do{
+        printf("\n=== AGENDAMENTOS ===\n");
+        printf("1 Novo Agendamento\n");
+        printf("2 Agenda do Dia\n");
+        printf("3 Listar Agendamentos\n");
+        printf("4 Buscar Agendamento\n");
+        printf("5 Confirmar Agendamento\n");
+        printf("6 Concluir Agendamento\n");
+        printf("7 Cancelar Agendamento\n");
+        printf("0 Voltar\n");
+        printf("Escolha: ");
+        scanf("%d", &opcao);
+        switch(opcao){
+            case 1: criarAgendamento(); break;
+            case 2: agendamentosDoDia(); break;
+            case 3: listarAgendamentos(); break;
+            case 4: buscarAgendamento(); break;
+            case 5: confirmarAgendamento(); break;
+            case 6: concluirAgendamento(); break;
+            case 7: cancelarAgendamento(); break;
             case 0: printf("Voltando...\n"); break;
             default: printf("Opcao invalida!\n");
         }

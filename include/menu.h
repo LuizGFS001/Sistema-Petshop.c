@@ -7,4 +7,5 @@ void menuCadastro();
 void menuProdutos();
 void menuFinanceiro();
 void menuAssinaturas();
+void menuAgendamentos();
 #endif
