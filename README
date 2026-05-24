@@ -1,34 +1,75 @@
-# 🐾 Petshop System
+# 🐾 SistemaUniPets
 
-Sistema de gerenciamento de petshop desenvolvido em **linguagem C** com banco de dados **SQLite**, operado via terminal.
+Sistema de gerenciamento de petshop operado via terminal, desenvolvido em **linguagem C** com banco de dados **SQLite**. Projeto universitário — Universidade Nove de Julho (Uni9).
+
+---
 
 ## Funcionalidades
 
-- Gerenciamento de **clientes**, **pets**, **serviços**, **pedidos** e **pagamentos**
-- Banco de dados relacional com integridade referencial (Foreign Keys + CASCADE)
-- Interface de navegação por menus interativos
+| Módulo | Descrição |
+|---|---|
+| **Clientes** | Cadastro, busca, edição e exclusão de clientes |
+| **Pets** | Vínculo de pets a clientes, CRUD completo |
+| **Serviços / Produtos** | Catálogo com 50 itens pré-carregados, controle de estoque |
+| **Atendimento** | Fluxo completo: recepção → serviços → resumo → pagamento |
+| **Pedidos** | Ordens de serviço com múltiplos itens por pet |
+| **Pagamentos** | Dinheiro, cartão ou Pix; desconto automático por plano |
+| **Assinaturas** | 3 planos com benefícios mensais e acúmulo de pontos |
+| **Agendamentos** | Agenda de serviços com geração automática de pedido ao concluir |
+
+---
+
+## Planos de Assinatura
+
+| Plano | Mensalidade | Desconto | Benefícios inclusos |
+|---|---|---|---|
+| PATINHAS | R$ 39,90 | 5% | 1 banho/mês grátis |
+| AMIGO PET | R$ 79,90 | 10% | 2 banhos + 1 tosa higiênica/mês grátis |
+| VIDA ANIMAL | R$ 149,90 | 15% | Banhos ilimitados + 2 tosas + 2 tosas higiênicas/mês |
+
+---
 
 ## Estrutura do Projeto
 
 ```
-├── src/          → Arquivos fonte (.c)
-├── include/      → Headers (.h)
-├── database/     → Conexão com o banco
-├── sqlite/       → Biblioteca SQLite (amalgamation)
-└── Petshop.db    → Banco de dados (gerado automaticamente)
+SistemaUniPets/
+├── src/
+│   ├── Main.c            → Entrada do programa
+│   ├── menu.c            → Navegação por menus
+│   ├── Atendimento.c     → Fluxo completo de atendimento
+│   ├── cliente.c         → CRUD de clientes
+│   ├── pet.c             → CRUD de pets
+│   ├── servico.c         → Catálogo de serviços e produtos
+│   ├── pedido.c          → Ordens de serviço
+│   ├── itens_pedido.c    → Itens de cada pedido (com lógica de planos)
+│   ├── pagamento.c       → Processamento de pagamentos
+│   ├── assinatura.c      → Planos e benefícios
+│   └── agendamento.c     → Sistema de agendamentos
+├── include/              → Headers (.h)
+├── database/
+│   ├── database.c        → Conexão, setup e migrations
+│   └── database.h
+├── sqlite/               → SQLite amalgamation (sqlite3.c / sqlite3.h)
+└── Petshop.db            → Banco gerado automaticamente na 1ª execução
 ```
+
+---
 
 ## Compilação
 
-### GCC (MinGW)
+### GCC / MinGW (recomendado)
+
 ```bash
-gcc src/Main.c src/cliente.c src/menu.c src/pet.c src/servico.c src/pedido.c src/itens_pedido.c src/pagamento.c database/database.c sqlite/sqlite3.c -I include -I sqlite -I database -o petshop.exe -D_WIN32_WINNT=0x0600
+gcc src/Main.c src/Atendimento.c src/cliente.c src/menu.c src/pet.c src/servico.c src/pedido.c src/itens_pedido.c src/pagamento.c src/assinatura.c src/agendamento.c database/database.c sqlite/sqlite3.c -I include -I sqlite -I database -o petshop.exe -D_WIN32_WINNT=0x0600
 ```
 
 ### MSVC (Visual Studio Build Tools)
+
 ```bash
-cl src\Main.c src\cliente.c src\menu.c src\pet.c src\servico.c src\pedido.c src\itens_pedido.c src\pagamento.c database\database.c sqlite\sqlite3.c /I include /I sqlite /I database /Fe:petshop.exe
+cl src\Main.c src\Atendimento.c src\cliente.c src\menu.c src\pet.c src\servico.c src\pedido.c src\itens_pedido.c src\pagamento.c src\assinatura.c src\agendamento.c database\database.c sqlite\sqlite3.c /I include /I sqlite /I database /Fe:petshop.exe
 ```
+
+---
 
 ## Execução
 
@@ -36,4 +77,58 @@ cl src\Main.c src\cliente.c src\menu.c src\pet.c src\servico.c src\pedido.c src\
 .\petshop.exe
 ```
 
-O banco de dados `Petshop.db` é criado automaticamente na primeira execução.
+Na primeira execução, o banco `Petshop.db` é criado automaticamente com:
+- 50 serviços e produtos pré-carregados
+- Cliente avulso (id 999) para atendimentos sem cadastro
+- Trigger de controle de estoque ativo
+
+---
+
+## Menu Principal
+
+```
+=== SISTEMA UNIPETS ===
+1  Novo Atendimento
+2  Consultas
+3  Cadastro
+4  Financeiro
+5  Assinaturas
+6  Agendamentos
+0  Sair
+```
+
+### Agendamentos
+```
+1  Novo Agendamento       → apenas serviços (sem produtos)
+2  Agenda do Dia          → filtrado pela data atual
+3  Listar Agendamentos
+4  Buscar Agendamento     → por ID, cliente, data ou status
+5  Confirmar Agendamento
+6  Concluir Agendamento   → gera pedido + pagamento automaticamente
+7  Cancelar Agendamento
+```
+
+---
+
+## Banco de Dados
+
+| Tabela | Descrição |
+|---|---|
+| `clientes` | Dados cadastrais dos clientes |
+| `pets` | Pets vinculados a clientes |
+| `servicos` | Serviços (estoque=-1) e produtos (estoque≥0) |
+| `pedidos` | Ordens de serviço por cliente |
+| `itens_pedido` | Itens de cada pedido com preço unitário |
+| `pagamentos` | Registros de pagamento por pedido |
+| `assinatura` | Planos ativos com pontos acumulados |
+| `uso_beneficios` | Controle mensal de benefícios utilizados |
+| `agendamentos` | Agenda de serviços com status e horário |
+
+---
+
+## Tecnologias
+
+- **Linguagem:** C (padrão C99)
+- **Banco de dados:** SQLite 3 (amalgamation — sem dependências externas)
+- **Compilador:** GCC / MinGW ou MSVC
+- **Plataforma:** Windows
