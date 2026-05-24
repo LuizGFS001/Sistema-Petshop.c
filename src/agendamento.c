@@ -154,8 +154,10 @@ void buscarAgendamento() {
     printf("2 Cliente ID\n");
     printf("3 Data (DD-MM-YYYY)\n");
     printf("4 Status (AGENDADO/CONFIRMADO/CONCLUIDO/CANCELADO)\n");
+    printf("0 Cancelar\n");
     printf("Escolha: ");
     scanf("%d", &opcao);
+    if(opcao == 0){ printf("Operacao cancelada.\n"); return; }
     while(getchar() != '\n');
 
     if(opcao == 1){
@@ -217,8 +219,9 @@ void buscarAgendamento() {
 static void alterarStatusAgendamento(const char *novo_status) {
     listarAgendamentos();
     int id;
-    printf("ID do agendamento: ");
+    printf("ID do agendamento (0 = cancelar): ");
     scanf("%d", &id);
+    if(id == 0){ printf("Operacao cancelada.\n"); return; }
 
     char sql[200];
     sprintf(sql, "UPDATE agendamentos SET status='%s' WHERE id=%d;", novo_status, id);
@@ -255,8 +258,9 @@ void concluirAgendamento() {
     sqlite3_exec(db, sql_lista, callbackAgendamento, 0, 0);
 
     int agenda_id;
-    printf("ID do agendamento a concluir: ");
+    printf("ID do agendamento a concluir (0 = cancelar): ");
     scanf("%d", &agenda_id);
+    if(agenda_id == 0){ printf("Operacao cancelada.\n"); return; }
 
     // busca dados do agendamento
     char sql_get[300];

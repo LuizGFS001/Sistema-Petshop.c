@@ -193,7 +193,9 @@ void buscarPet(){//função para buscar pets no banco de dados com base em difer
     printf("1 ID do pet\n");
     printf("2 Nome do pet\n");
     printf("3 ID do cliente (tutor)\n");
+    printf("0 Cancelar\n");
     scanf("%d",&opcao);
+    if(opcao == 0){ printf("Operacao cancelada.\n"); return; }
 
     while(getchar() != '\n');//limpeza de buffer
 
@@ -268,15 +270,18 @@ void alterarPet(){//função para alterar as informações de um pet no banco de
 
     listarPets();
 
-    printf("Digite o ID do pet que deseja alterar: ");
+    printf("Digite o ID do pet que deseja alterar (0 = cancelar): ");
     scanf("%d", &id);
+    if(id == 0){ printf("Operacao cancelada.\n"); return; }
 
     printf("\n1 Alterar nome\n");
     printf("2 Alterar especie\n");
     printf("3 Alterar raca\n");
     printf("4 Alterar idade\n");
+    printf("0 Cancelar\n");
     printf("Escolha: ");
     scanf("%d", &opcao);
+    if(opcao == 0){ printf("Operacao cancelada.\n"); return; }
 
     printf("Digite o novo valor: ");
     scanf(" %[^\n]", valor);

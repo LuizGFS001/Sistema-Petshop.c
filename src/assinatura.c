@@ -9,6 +9,11 @@
 
 
 
+static int callbackContador(void *data, int argc, char **argv, char **col) {
+    if(argc > 0 && argv[0]) *(int*)data = atoi(argv[0]);
+    return 0;
+}
+
 void criarTabelaAssinatura() {//função para criar a tabela de assinaturas no banco de dados, caso ela ainda não exista. A função utiliza um comando SQL para definir a estrutura da tabela, incluindo os campos id, cliente_id, pet_id, plano, valor, data_inicio, data_renovacao, status e pontos. Os campos cliente_id e pet_id são definidos como chaves estrangeiras que referenciam as tabelas de clientes e pets, respectivamente. A função também inclui tratamento de erros para informar caso haja algum problema durante a criação da tabela.
     char *sql =
 
@@ -34,12 +39,13 @@ void criarTabelaAssinatura() {//função para criar a tabela de assinaturas no b
     }
 }
 
-static int callbackAssinatura(//callback para exibir os dados das assinaturas, formatando a saída de forma legível. A função percorre os resultados da consulta SQL e imprime cada campo da assinatura, incluindo o ID, nome do cliente, nome do pet, plano, valor, data de início, data de renovação, status e pontos acumulados. A função retorna 0 para indicar que a execução foi bem-sucedida.
+static int callbackAssinatura(
     void *data,
     int argc,
     char **argv,
     char **col
 ) {
+    if (data) (*(int*)data)++;
     for (int i = 0; i < argc; i++) {
         printf(
             "%s : %s\n",
@@ -58,20 +64,34 @@ void cadastrarAssinatura() {//função para cadastrar uma nova assinatura, solic
 
     printf("\n=== NOVA ASSINATURA ===\n");
 
-    printf("ID cliente: ");
-    scanf("%d", &a.cliente_id);
+    listarClientes();
 
-    printf("ID pet: ");
+    printf("ID cliente (0 = cancelar): ");
+    scanf("%d", &a.cliente_id);
+    if(a.cliente_id == 0){ printf("Operacao cancelada.\n"); return; }
+
+    char sql_val[200];
+    int existe = 0;
+    sprintf(sql_val, "SELECT COUNT(*) FROM clientes WHERE id=%d;", a.cliente_id);
+    sqlite3_exec(db, sql_val, callbackContador, &existe, 0);
+    if(!existe){ printf("Cliente ID %d nao encontrado.\n", a.cliente_id); return; }
+
+    printf("ID pet (0 = sem pet vinculado): ");
     scanf("%d", &a.pet_id);
 
     printf("\nPLANOS\n");
     printf("1 - PATINHAS\n");
     printf("2 - AMIGO PET\n");
     printf("3 - VIDA ANIMAL\n");
+    printf("0 - Cancelar\n");
     printf("Escolha: ");
     scanf("%d", &op);
 
     switch(op) {
+
+        case 0:
+            printf("Operacao cancelada.\n");
+            return;
 
         case 1:
             strcpy(a.plano, "PATINHAS");
@@ -101,21 +121,38 @@ void cadastrarAssinatura() {//função para cadastrar uma nova assinatura, solic
     a.pontos = 0;
 
     char sql[1000];
-    sprintf(
-        sql,
-        "INSERT INTO assinatura "
-        "(cliente_id, pet_id, plano, valor, data_inicio, data_renovacao, status, pontos) "
-        "VALUES "
-        "(%d,%d,'%s',%.2f,'%s','%s','%s',%d);",
-        a.cliente_id,
-        a.pet_id,
-        a.plano,
-        a.valor,
-        a.data_inicio,
-        a.data_renovacao,
-        a.status,
-        a.pontos
-    );
+    if (a.pet_id == 0) {
+        sprintf(
+            sql,
+            "INSERT INTO assinatura "
+            "(cliente_id, pet_id, plano, valor, data_inicio, data_renovacao, status, pontos) "
+            "VALUES "
+            "(%d,NULL,'%s',%.2f,'%s','%s','%s',%d);",
+            a.cliente_id,
+            a.plano,
+            a.valor,
+            a.data_inicio,
+            a.data_renovacao,
+            a.status,
+            a.pontos
+        );
+    } else {
+        sprintf(
+            sql,
+            "INSERT INTO assinatura "
+            "(cliente_id, pet_id, plano, valor, data_inicio, data_renovacao, status, pontos) "
+            "VALUES "
+            "(%d,%d,'%s',%.2f,'%s','%s','%s',%d);",
+            a.cliente_id,
+            a.pet_id,
+            a.plano,
+            a.valor,
+            a.data_inicio,
+            a.data_renovacao,
+            a.status,
+            a.pontos
+        );
+    }
 
     char *erro = 0;
 
@@ -163,8 +200,9 @@ void buscarAssinatura() {//função para buscar assinaturas no banco de dados, p
 
     int cliente;
 
-    printf("Cliente ID: ");
+    printf("Cliente ID (0 = cancelar): ");
     scanf("%d", &cliente);
+    if(cliente == 0){ printf("Operacao cancelada.\n"); return; }
 
     char sql[300];
 
@@ -176,13 +214,12 @@ void buscarAssinatura() {//função para buscar assinaturas no banco de dados, p
         cliente
     );
 
-    sqlite3_exec(
-        db,
-        sql,
-        callbackAssinatura,
-        0,
-        0
-    );
+    int count = 0;
+    sqlite3_exec(db, sql, callbackAssinatura, &count, 0);
+
+    if (count == 0) {
+        printf("Nenhuma assinatura encontrada para o cliente %d.\n", cliente);
+    }
 }
 
 void renovarAssinatura() {//função para renovar uma assinatura, solicitando ao usuário o ID da assinatura e a nova data de renovação. A função constrói uma consulta SQL de atualização para modificar a data de renovação da assinatura correspondente ao ID fornecido e executa a consulta usando sqlite3_exec. Caso haja algum erro durante a execução da consulta, a função exibe uma mensagem de erro; caso contrário, confirma que a assinatura foi renovada com sucesso.
@@ -191,8 +228,9 @@ void renovarAssinatura() {//função para renovar uma assinatura, solicitando ao
     char data[20];
 
     listarAssinaturas();
-    printf("ID assinatura: ");
+    printf("ID assinatura (0 = cancelar): ");
     scanf("%d", &id);
+    if(id == 0){ printf("Operacao cancelada.\n"); return; }
     printf("Nova renovacao: ");
     scanf(" %[^\n]", data);
 
@@ -223,8 +261,9 @@ void cancelarAssinatura() {//função para cancelar uma assinatura, solicitando 
     int id;
 
     listarAssinaturas();
-    printf("ID assinatura: ");
+    printf("ID assinatura (0 = cancelar): ");
     scanf("%d", &id);
+    if(id == 0){ printf("Operacao cancelada.\n"); return; }
 
     char sql[300];
 

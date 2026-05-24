@@ -164,17 +164,19 @@ int buscarCliente(){//função para buscar clientes no banco de dados, permitind
     printf("2 Nome\n");
     printf("3 Telefone\n");
     printf("4 CPF\n");
+    printf("0 Cancelar\n");
 
     printf("Escolha: ");
     scanf("%d",&opcao);
 
     while(getchar() != '\n'); // limpeza de buffer
 
-    if(opcao == 1)       printf("Digite o ID: ");
+    if(opcao == 0){ printf("Operacao cancelada.\n"); return 0; }
+    else if(opcao == 1)  printf("Digite o ID: ");
     else if(opcao == 2)  printf("Digite o Nome: ");
     else if(opcao == 3)  printf("Digite o Telefone: ");
     else if(opcao == 4)  printf("Digite o CPF: ");
-    else { printf("Opcao invalida!\n"); return 999; }
+    else { printf("Opcao invalida!\n"); return 0; }
 
     scanf("%[^\n]", valor);
 
@@ -229,9 +231,11 @@ void alterarCliente(){//função para alterar os dados de um cliente existente n
     printf("3 Alterar email\n");
     printf("4 Alterar endereco\n");
     printf("5 Alterar telefone\n");
+    printf("0 Cancelar\n");
 
     printf("Escolha: ");
     scanf("%d",&opcao);
+    if(opcao == 0){ printf("Operacao cancelada.\n"); return; }
 
     printf("Digite o novo valor: ");
     scanf(" %[^\n]", valor);

@@ -92,7 +92,9 @@ void buscarPagamento(){
     printf("1 ID do pagamento\n");
     printf("2 ID do pedido\n");
     printf("3 Forma de pagamento\n");
+    printf("0 Cancelar\n");
     scanf("%d", &opcao);
+    if(opcao == 0){ printf("Operacao cancelada.\n"); return; }
     while(getchar() != '\n');
 
     if(opcao == 1){

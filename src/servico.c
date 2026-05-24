@@ -55,9 +55,11 @@ scanf("%f",&novo.preco);
 printf("\nTIPO\n");
 printf("1 SERVICO\n");
 printf("2 PRODUTO\n");
+printf("0 Cancelar\n");
 
 int op;
 scanf("%d",&op);
+if(op==0){ printf("Operacao cancelada.\n"); break; }
 if(op==1){
 strcpy(novo.tipo,"SERVICO");
 novo.estoque=-1;
@@ -94,7 +96,9 @@ void buscarServico(){//função para buscar serviços no banco de dados, permiti
     printf("\nBuscar servico por:\n");
     printf("1 ID\n");
     printf("2 Nome\n");
+    printf("0 Cancelar\n");
     scanf("%d", &opcao);
+    if(opcao == 0){ printf("Operacao cancelada.\n"); return; }
     while(getchar() != '\n');
     if(opcao == 1){
         printf("Digite o ID: ");
@@ -117,13 +121,16 @@ void alterarServico(){//função para alterar os dados de um serviço existente 
     char valor[100];
     char sql[300];
     listarServicos();
-    printf("Digite o ID do servico que deseja alterar: ");
+    printf("Digite o ID do servico que deseja alterar (0 = cancelar): ");
     scanf("%d", &id);
+    if(id == 0){ printf("Operacao cancelada.\n"); return; }
     printf("\n1 Alterar nome\n");
     printf("2 Alterar descricao\n");
     printf("3 Alterar preco\n");
+    printf("0 Cancelar\n");
     printf("Escolha: ");
     scanf("%d", &opcao);
+    if(opcao == 0){ printf("Operacao cancelada.\n"); return; }
     printf("Digite o novo valor: ");
     scanf(" %[^\n]", valor);
     switch(opcao){
