@@ -53,7 +53,7 @@ void saveClientDB(struct cliente c){//salvar clientes
 }
 
 int callback(void *data, int argcount, char **argvetor, char **vtColName){ //callback para processar os resultados das consultas SQL, imprimindo as informações de cada cliente no console. A função recebe como parâmetros um ponteiro para dados adicionais (data), o número de colunas retornadas (argcount), um vetor de strings contendo os valores das colunas (argvetor) e um vetor de strings contendo os nomes das colunas (vtColName). A função itera sobre as colunas e imprime o nome e o valor de cada coluna, formatando a saída para facilitar a leitura. A função retorna 0 para indicar que a execução foi bem-sucedida.
-    
+    if(data) (*(int*)data)++;
     for(int i = 0; i < argcount; i++){
         printf("%s: %s\n", //o printf vai imprimir o nome e o valor da coluna
             vtColName[i],

@@ -82,12 +82,13 @@ void listarPedidos(){//função para listar os pedidos cadastrados no banco de d
 void buscarPedido(){//função para buscar pedidos no banco de dados com base em diferentes critérios, como ID do pedido, ID do cliente ou status do pedido. A função solicita ao usuário o critério de busca e o valor correspondente, constrói uma consulta SQL com base na escolha do usuário e executa a consulta usando sqlite3_exec. A função utiliza um callback para processar os resultados da consulta e exibir as informações dos pedidos encontrados. Caso haja algum erro durante a execução da consulta, a função exibe uma mensagem de erro.
     int opcao;
     char valor[100];
-    char sql[400];
+    char sql[600];
 
     printf("\nBuscar pedido por:\n");
     printf("1 ID\n");
     printf("2 Cliente ID\n");
-    printf("3 Status\n");
+    printf("3 Status (aberto / em andamento / fechado)\n");
+    printf("4 Listar todos\n");
     printf("Escolha: ");
     scanf("%d", &opcao);
     while(getchar() != '\n');
@@ -96,31 +97,48 @@ void buscarPedido(){//função para buscar pedidos no banco de dados com base em
         printf("Digite o ID do pedido: ");
         scanf(" %[^\n]", valor);
         sprintf(sql,
-        "SELECT * FROM pedidos WHERE id=%s;", valor);
+        "SELECT pedidos.id, clientes.nome AS cliente, pedidos.data, pedidos.total, pedidos.status "
+        "FROM pedidos LEFT JOIN clientes ON pedidos.cliente_id = clientes.id "
+        "WHERE pedidos.id=%s;", valor);
     }
     else if(opcao == 2){
         printf("Digite o ID do cliente: ");
         scanf(" %[^\n]", valor);
         sprintf(sql,
-        "SELECT * FROM pedidos WHERE cliente_id=%s;", valor);
+        "SELECT pedidos.id, clientes.nome AS cliente, pedidos.data, pedidos.total, pedidos.status "
+        "FROM pedidos LEFT JOIN clientes ON pedidos.cliente_id = clientes.id "
+        "WHERE pedidos.cliente_id=%s ORDER BY pedidos.id DESC;", valor);
     }
     else if(opcao == 3){
-        printf("Digite o status (aberto/fechado): ");
+        printf("Digite o status (aberto / em andamento / fechado): ");
         scanf(" %[^\n]", valor);
         sprintf(sql,
-        "SELECT * FROM pedidos WHERE status='%s';", valor);
+        "SELECT pedidos.id, clientes.nome AS cliente, pedidos.data, pedidos.total, pedidos.status "
+        "FROM pedidos LEFT JOIN clientes ON pedidos.cliente_id = clientes.id "
+        "WHERE pedidos.status='%s' ORDER BY pedidos.id DESC;", valor);
+    }
+    else if(opcao == 4){
+        sprintf(sql,
+        "SELECT pedidos.id, clientes.nome AS cliente, pedidos.data, pedidos.total, pedidos.status "
+        "FROM pedidos LEFT JOIN clientes ON pedidos.cliente_id = clientes.id "
+        "ORDER BY pedidos.id DESC;");
     }
     else{
         printf("Opcao invalida!\n");
         return;
     }
 
+    printf("\n=== RESULTADO DA BUSCA ===\n");
+    int count = 0;
     char *errMsg = 0;
-    sqlite3_exec(db, sql, callback, 0, &errMsg);
+    sqlite3_exec(db, sql, callback, &count, &errMsg);
 
     if(errMsg){
         printf("Erro na busca: %s\n", errMsg);
         sqlite3_free(errMsg);
+    }
+    if(count == 0){
+        printf("Nenhum pedido encontrado.\n");
     }
 }
 

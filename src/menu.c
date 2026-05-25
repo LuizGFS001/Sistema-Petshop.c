@@ -56,8 +56,9 @@ void menuConsultas(){//função para exibir um menu de consultas, permitindo ao 
         printf("1 Buscar Clientes\n");
         printf("2 Buscar Pets\n");
         printf("3 Buscar Servicos\n");
-        printf("4 Buscar Pedidos\n");
-        printf("5 Buscar Pagamentos\n");
+        printf("4 Listar Pedidos\n");
+        printf("5 Buscar Pedidos\n");
+        printf("6 Buscar Pagamentos\n");
         printf("0 Voltar\n");
 
         scanf("%d", &opcao);
@@ -66,8 +67,9 @@ void menuConsultas(){//função para exibir um menu de consultas, permitindo ao 
             case 1: buscarCliente(); break;
             case 2: buscarPet(); break;
             case 3: buscarServico(); break;
-            case 4: buscarPedido(); break;
-            case 5: buscarPagamento(); break;
+            case 4: listarPedidos(); break;
+            case 5: buscarPedido(); break;
+            case 6: buscarPagamento(); break;
         }
 
     }while(opcao != 0);
